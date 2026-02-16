@@ -1,0 +1,30 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.pdb
+*.dll
+*.exe
+*.log
+
+# Visual Studio
+.vs/
+.vscode/
+*.dbmdl
+*.dbproj
+*.dbproj.user
+
+# Docker
+docker-compose.vs.*
+**/Docker/empty/
+docker-compose.override.yml
+docker-compose.dcproj
+
+# Environment variables
+.env
+
+# OS
+.DS_Store
+Thumbs.db
