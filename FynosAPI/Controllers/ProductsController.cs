@@ -17,9 +17,18 @@ namespace FynosAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
+        public async Task<ActionResult<IEnumerable<Product>>> GetProducts([FromQuery] string? gender)
         {
-            return await _context.Products.ToListAsync();
+            var query = _context.Products.AsQueryable();
+
+            if(!string.IsNullOrEmpty(gender) )
+            {
+                query = query.Where(p => p.Gender.ToLower() == gender.ToLower());
+            }
+
+            var products = await query.ToListAsync();
+
+            return Ok(products);
         }
 
         [HttpGet("{id}")]
