@@ -13,6 +13,9 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: ${DB_CONNECTION}
+      Jwt__Key: ${JWT_KEY}
+      Jwt__Issuer: ${JWT_ISSUER}
+      Jwt__Audience: ${JWT_AUDIENCE}
 
   postgres:
     image: postgres:16
@@ -26,7 +29,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/posgresql/data
+      - postgres_data:/var/lib/postgresql/data
   pgadmin:
     image: dpage/pgadmin4
     container_name: fynos-pgadmin
