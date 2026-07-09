@@ -1,7 +1,4 @@
 ﻿using FynosAPI.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
-using System.Reflection;
-using System.Xml.Linq;
 
 namespace FynosAPI.Data
 {
@@ -9,7 +6,7 @@ namespace FynosAPI.Data
     {
         public static async Task SeedAsync(ApplicationDbContext context)
         {
-            if(context.Products.Any())
+            if (context.Products.Any())
             {
                 return;
             }
@@ -18,46 +15,89 @@ namespace FynosAPI.Data
             {
                 new Product
                 {
-                    Name = "FYNOS Essential Tee",
-                    Description = "A premium everyday t-shirt with a clean streetwear look.",
-                    Price = 29.99m,
-                    Gender = "Men",
-                    ProductImage = "/images/muaythaishorts.jpg",
-                    CreatedAt = DateTime.UtcNow
-                },
-                new Product
-                {
-                    Name = "FYNOS Street Hoodie",
-                    Description = "Heavyweight hoodie designed for comfort and style.",
+                    Name = "FYNOS Muay Thai Shorts",
+                    Description = "Lightweight training shorts built for striking, grappling, and everyday training.",
                     Price = 64.99m,
                     Gender = "Men",
+                    Category = "Shorts",
+                    StockQuantity = 20,
                     ProductImage = "/images/muaythaishorts.jpg",
                     CreatedAt = DateTime.UtcNow
                 },
                 new Product
                 {
-                    Name = "FYNOS Logo Cap",
-                    Description = "Classic cap featuring the FYNOS logo.",
-                    Price = 34.99m,
+                    Name = "FYNOS Fight Shorts",
+                    Description = "Durable fight shorts with a clean athletic fit.",
+                    Price = 69.99m,
                     Gender = "Men",
+                    Category = "Shorts",
+                    StockQuantity = 15,
                     ProductImage = "/images/muaythaishorts.jpg",
                     CreatedAt = DateTime.UtcNow
                 },
                 new Product
                 {
-                    Name = "FYNOS Crop Top",
-                    Description = "Classic top featuring the FYNOS logo.",
-                    Price = 34.99m,
-                    Gender = "Women",
+                    Name = "FYNOS Performance Rashguard",
+                    Description = "Compression rashguard designed for no-gi training and high-intensity sessions.",
+                    Price = 54.99m,
+                    Gender = "Men",
+                    Category = "Rashguards",
+                    StockQuantity = 18,
                     ProductImage = "/images/muaythaishorts.jpg",
                     CreatedAt = DateTime.UtcNow
                 },
                 new Product
                 {
-                    Name = "FYNOS Tights",
-                    Description = "Classic Tights featuring the FYNOS logo.",
+                    Name = "FYNOS Oversized Tee",
+                    Description = "Oversized premium tee with a clean streetwear silhouette.",
+                    Price = 39.99m,
+                    Gender = "Unisex",
+                    Category = "T-Shirts",
+                    StockQuantity = 30,
+                    ProductImage = "/images/muaythaishorts.jpg",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new Product
+                {
+                    Name = "FYNOS Heavyweight Hoodie",
+                    Description = "Heavyweight hoodie designed for comfort, training, and daily wear.",
+                    Price = 79.99m,
+                    Gender = "Unisex",
+                    Category = "Hoodies",
+                    StockQuantity = 12,
+                    ProductImage = "/images/muaythaishorts.jpg",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new Product
+                {
+                    Name = "FYNOS Women's Training Shorts",
+                    Description = "Training shorts designed for movement, comfort, and performance.",
+                    Price = 59.99m,
+                    Gender = "Women",
+                    Category = "Shorts",
+                    StockQuantity = 16,
+                    ProductImage = "/images/muaythaishorts.jpg",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new Product
+                {
+                    Name = "FYNOS Women's Crop Tee",
+                    Description = "Cropped training tee with a clean athletic look.",
                     Price = 34.99m,
                     Gender = "Women",
+                    Category = "T-Shirts",
+                    StockQuantity = 22,
+                    ProductImage = "/images/muaythaishorts.jpg",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new Product
+                {
+                    Name = "FYNOS Backpack",
+                    Description = "Everyday training backpack for gym gear and essentials.",
+                    Price = 49.99m,
+                    Gender = "Unisex",
+                    Category = "Accessories",
+                    StockQuantity = 10,
                     ProductImage = "/images/muaythaishorts.jpg",
                     CreatedAt = DateTime.UtcNow
                 }
