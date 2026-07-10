@@ -10,6 +10,7 @@
         public string? Category { get; set; }
         public int StockQuantity { get; set; }
         public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
         public string? ProductImage { get; set; }
 
     }

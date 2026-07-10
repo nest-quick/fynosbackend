@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
-using FynosAPI.Data;
 using FynosAPI.Models;
 using FynosAPI.Dtos;
+using FynosAPI.Interfaces;
 
 namespace FynosAPI.Controllers
 {
@@ -11,84 +10,52 @@ namespace FynosAPI.Controllers
     [Route("api/[controller]")]
     public class ProductsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IProductService _productService;
 
-        public ProductsController(ApplicationDbContext context)
+        public ProductsController(IProductService productService)
         {
-            _context = context;
+            _productService = productService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProducts([FromQuery] string? gender)
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts([FromQuery] string? gender)
         {
-            var query = _context.Products.AsQueryable();
-
-            if(!string.IsNullOrEmpty(gender) )
-            {
-                query = query.Where(p => p.Gender.ToLower() == gender.ToLower());
-            }
-
-            var products = await query.ToListAsync();
+            var products = await _productService.GetProductsAsync(gender);
 
             return Ok(products);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProduct(int id)
+        public async Task<ActionResult<ProductDto>> GetProduct(int id)
         {
-            var product = await _context.Products.FindAsync(id);
+            var product = await _productService.GetProductByIdAsync(id);
 
             if (product == null)
             {
                 return NotFound();
             }
 
-            return product;
+            return Ok(product);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<ActionResult<Product>> CreateProduct(CreateProductDto dto)
+        public async Task<ActionResult<ProductDto>> CreateProduct(CreateProductDto dto)
         {
-            var product = new Product
-            {
-                Name = dto.Name,
-                Description = dto.Description,
-                Price = dto.Price,
-                Gender = dto.Gender,
-                ProductImage = dto.ProductImage,
-                CreatedAt = DateTime.UtcNow,
-
-            };
-
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
+            var product = await _productService.CreateProductAsync(dto);
 
             return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProduct(int id, Product product)
+        public async Task<IActionResult> UpdateProduct(int id, [FromBody] UpdateProductDto dto)
         {
-            if (id != product.Id)
-            {
-                return BadRequest();
-            }
+            var updated = await _productService.UpdateProductAsync(id, dto);
 
-            _context.Entry(product).State = EntityState.Modified;
-
-            try
+            if (!updated)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProductExists(id))
-                {
-                    return NotFound();
-                }
-                throw;
+                return NotFound();
             }
 
             return NoContent();
@@ -98,21 +65,14 @@ namespace FynosAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            var deleted = await _productService.DeleteProductAsync(id);
+
+            if (!deleted)
             {
                 return NotFound();
             }
 
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
-
             return NoContent();
-        }
-
-        private bool ProductExists(int id)
-        {
-            return _context.Products.Any(e => e.Id == id);
         }
     }
 }
