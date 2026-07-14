@@ -132,7 +132,7 @@ using (var scope = app.Services.CreateScope())
     //Seed Database
     await DbInitializer.SeedAsync(db);
 
-    await IdentitySeeder.SeedAdminAsync(scope.ServiceProvider);
+    await IdentitySeeder.SeedAdminAsync(scope.ServiceProvider, builder.Configuration);
 }
 
 app.Run();
