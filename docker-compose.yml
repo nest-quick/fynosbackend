@@ -16,6 +16,8 @@ services:
       Jwt__Key: ${JWT_KEY}
       Jwt__Issuer: ${JWT_ISSUER}
       Jwt__Audience: ${JWT_AUDIENCE}
+      IdentitySeeder__AdminEmail: ${ADMIN_EMAIL}
+      IdentitySeeder__AdminPassword: ${ADMIN_PASSWORD}
 
   postgres:
     image: postgres:16

@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using FynosAPI.Interfaces;
 using FynosAPI.Services;
+using FynosAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -105,6 +106,9 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+// Global exception handler
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
