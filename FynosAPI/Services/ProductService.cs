@@ -9,14 +9,20 @@ namespace FynosAPI.Services
     public class ProductService : IProductService
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<ProductService> _logger;
 
-        public ProductService(ApplicationDbContext context)
+        public ProductService(ApplicationDbContext context, ILogger<ProductService> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<ProductDto>> GetProductsAsync(string? gender)
         {
+            _logger.LogInformation(
+                "Retrieving products. Gender filter: {Gender}",
+                gender ?? "None");
+
             var query = _context.Products.AsNoTracking().AsQueryable();
 
             if (!string.IsNullOrEmpty(gender))
@@ -25,18 +31,30 @@ namespace FynosAPI.Services
             }
 
             var products = await query.ToListAsync();
+            
+            _logger.LogInformation(
+                "Retrieved {ProductCount} products",
+                products.Count);
 
             return products.Select(MapToDto);
         }
 
         public async Task<ProductDto?> GetProductByIdAsync(int id)
         {
+            _logger.LogInformation(
+                "Retrieving product {ProductId}",
+                id);
+
             var product = await _context.Products
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (product == null)
             {
+                _logger.LogWarning(
+                    "Product {ProductId} was not found",
+                    id);
+
                 return null;
             }
 
@@ -60,6 +78,11 @@ namespace FynosAPI.Services
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
+            _logger.LogInformation(
+                "Created product {ProductId} with name {ProductName}",
+                product.Id,
+                product.Name);
+
             return MapToDto(product);
         }
 
@@ -69,6 +92,10 @@ namespace FynosAPI.Services
 
             if (product == null)
             {
+                _logger.LogWarning(
+                    "Cannot update product {ProductId} because it was not found",
+                    id);
+
                 return false;
             }
 
@@ -79,10 +106,13 @@ namespace FynosAPI.Services
             product.Category = dto.Category;
             product.StockQuantity = dto.StockQuantity;
             product.ProductImage = dto.ProductImage;
-
             product.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+
+            _logger.LogInformation(
+                "Updated product {ProductId}",
+                id);
 
             return true;
         }
@@ -93,11 +123,20 @@ namespace FynosAPI.Services
 
             if (product == null)
             {
+                _logger.LogWarning(
+                    "Cannot delete product {ProductId} because it was not found",
+                    id);
+
                 return false;
             }
 
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
+
+            _logger.LogInformation(
+                "Deleted product {ProductId} with name {ProductName}",
+                product.Id,
+                product.Name);
 
             return true;
         }
