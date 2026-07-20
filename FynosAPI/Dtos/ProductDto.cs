@@ -1,4 +1,6 @@
-﻿namespace FynosAPI.Dtos
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FynosAPI.Dtos
 {
     public class ProductDto
     {
@@ -10,7 +12,9 @@
         public decimal Price { get; set; }
 
         public string? Gender { get; set; }
-        public string? Category { get; set; }
+
+        [Range(1, int.MaxValue)]
+        public int CategoryId { get; set; }
 
         public bool InStock { get; set; }
 

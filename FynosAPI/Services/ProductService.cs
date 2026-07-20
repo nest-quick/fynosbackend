@@ -23,7 +23,10 @@ namespace FynosAPI.Services
                 "Retrieving products. Gender filter: {Gender}",
                 gender ?? "None");
 
-            var query = _context.Products.AsNoTracking().AsQueryable();
+            var query = _context.Products
+                .AsNoTracking()
+                .Include(product => product.Category)
+                .AsQueryable();
 
             if (!string.IsNullOrEmpty(gender))
             {
@@ -47,6 +50,7 @@ namespace FynosAPI.Services
 
             var product = await _context.Products
                 .AsNoTracking()
+                .Include(product => product.Category)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (product == null)
@@ -63,13 +67,22 @@ namespace FynosAPI.Services
 
         public async Task<ProductDto> CreateProductAsync(CreateProductDto dto)
         {
+            var categoryExists = await _context.Categories
+                .AnyAsync(category => category.Id == dto.CategoryId);
+
+            if (!categoryExists)
+            {
+                throw new ArgumentException(
+                    $"Category {dto.CategoryId} does not exist.");
+            }
+
             var product = new Product
             {
                 Name = dto.Name,
                 Description = dto.Description,
                 Price = dto.Price,
                 Gender = dto.Gender,
-                Category = dto.Category,
+                CategoryId = dto.CategoryId,
                 StockQuantity = dto.StockQuantity,
                 ProductImage = dto.ProductImage,
                 CreatedAt = DateTime.UtcNow
@@ -82,6 +95,12 @@ namespace FynosAPI.Services
                 "Created product {ProductId} with name {ProductName}",
                 product.Id,
                 product.Name);
+
+            // Reload the product with its Category navigation property.
+            var createdProduct = await _context.Products
+                .AsNoTracking()
+                .Include(product => product.Category)
+                .FirstAsync(product => product.Id == product.Id);
 
             return MapToDto(product);
         }
@@ -99,11 +118,20 @@ namespace FynosAPI.Services
                 return false;
             }
 
+            var categoryExists = await _context.Categories
+                .AnyAsync(category => category.Id == dto.CategoryId);
+
+            if (!categoryExists)
+            {
+                throw new ArgumentException(
+                    $"Category {dto.CategoryId} does not exist.");
+            }
+
             product.Name = dto.Name;
             product.Description = dto.Description;
             product.Price = dto.Price;
             product.Gender = dto.Gender;
-            product.Category = dto.Category;
+            product.CategoryId = dto.CategoryId;
             product.StockQuantity = dto.StockQuantity;
             product.ProductImage = dto.ProductImage;
             product.UpdatedAt = DateTime.UtcNow;
@@ -150,7 +178,7 @@ namespace FynosAPI.Services
                 Description = product.Description,
                 Price = product.Price,
                 Gender = product.Gender,
-                Category = product.Category,
+                CategoryId = product.CategoryId,
                 InStock = product.StockQuantity > 0,
                 ProductImage = product.ProductImage,
                 CreatedAt = product.CreatedAt,
