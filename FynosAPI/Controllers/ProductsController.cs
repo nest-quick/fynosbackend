@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using FynosAPI.Models;
 using FynosAPI.Dtos;
 using FynosAPI.Interfaces;
+using FynosAPI.Dtos.Products;
 
 namespace FynosAPI.Controllers
 {
@@ -18,9 +19,9 @@ namespace FynosAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts([FromQuery] string? gender)
+        public async Task<ActionResult<IReadOnlyList<ProductDto>>> GetProducts([FromQuery] ProductQueryParameters queryParameters)
         {
-            var products = await _productService.GetProductsAsync(gender);
+            var products = await _productService.GetProductsAsync(queryParameters);
 
             return Ok(products);
         }
