@@ -3,6 +3,7 @@ using FynosAPI.Data;
 using FynosAPI.Dtos;
 using FynosAPI.Interfaces;
 using FynosAPI.Models;
+using FynosAPI.Dtos.Products;
 
 namespace FynosAPI.Services
 {
@@ -17,29 +18,93 @@ namespace FynosAPI.Services
             _logger = logger;
         }
 
-        public async Task<IEnumerable<ProductDto>> GetProductsAsync(string? gender)
+        public async Task<IReadOnlyList<ProductDto>> GetProductsAsync(ProductQueryParameters queryParameters)
         {
+            if (queryParameters.MinPrice.HasValue &&
+                queryParameters.MaxPrice.HasValue &&
+                queryParameters.MinPrice > queryParameters.MaxPrice)
+            {
+                throw new ArgumentException(
+                    "Minimum price cannot be greater than maximum price.");
+            }
+
             _logger.LogInformation(
-                "Retrieving products. Gender filter: {Gender}",
-                gender ?? "None");
+                    "Retrieving products with Gender: {Gender}, CategoryId: {CategoryId}, MinPrice: {MinPrice}, MaxPrice: {MaxPrice}, InStock: {InStock}",
+                    queryParameters.Gender,
+                    queryParameters.CategoryId,
+                    queryParameters.MinPrice,
+                    queryParameters.MaxPrice,
+                    queryParameters.InStock);
 
             var query = _context.Products
                 .AsNoTracking()
                 .Include(product => product.Category)
                 .AsQueryable();
 
-            if (!string.IsNullOrEmpty(gender))
+            if (!string.IsNullOrEmpty(queryParameters.Gender))
             {
-                query = query.Where(p => p.Gender != null && p.Gender.ToLower() == gender.ToLower());
+                var gender = queryParameters.Gender.Trim();
+
+                query = query.Where(product =>
+                    product.Gender != null &&
+                    product.Gender.ToLower() == gender.ToLower());
             }
 
-            var products = await query.ToListAsync();
-            
+            if (queryParameters.CategoryId.HasValue)
+            {
+                query = query.Where(product =>
+                    product.CategoryId == queryParameters.CategoryId.Value);
+            }
+
+            if (queryParameters.MinPrice.HasValue)
+            {
+                query = query.Where(product =>
+                    product.Price >= queryParameters.MinPrice.Value);
+            }
+
+            if (queryParameters.MaxPrice.HasValue)
+            {
+                query = query.Where(product =>
+                    product.Price <= queryParameters.MaxPrice.Value);
+            }
+
+            if (queryParameters.InStock.HasValue)
+            {
+                if (queryParameters.InStock.Value)
+                {
+                    query = query.Where(product =>
+                        product.StockQuantity > 0);
+                }
+                else
+                {
+                    query = query.Where(product =>
+                        product.StockQuantity == 0);
+                }
+            }
+
+            var products = await query
+                .OrderBy(product => product.Name)
+                .Select(product => new ProductDto
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Description = product.Description,
+                    Price = product.Price,
+                    Gender = product.Gender,
+                    CategoryId = product.CategoryId,
+                    CategoryName = product.Category.Name,
+                    InStock = product.StockQuantity > 0,
+                    ProductImage = product.ProductImage,
+                    CreatedAt = product.CreatedAt,
+                    UpdatedAt = product.UpdatedAt
+                })
+                .ToListAsync();
+
             _logger.LogInformation(
                 "Retrieved {ProductCount} products",
-                products.Count);
+                 products.Count);
 
-            return products.Select(MapToDto);
+            return products;
         }
 
         public async Task<ProductDto?> GetProductByIdAsync(int id)
