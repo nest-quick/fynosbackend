@@ -12,17 +12,27 @@ namespace FynosAPI.Data
         }
 
         public DbSet<Product> Products { get; set; }
+        public DbSet<Category> Categories {  get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(builder);
 
-            modelBuilder.Entity<Product>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
-                entity.Property(e => e.Price).HasPrecision(18, 2);
-            });
+            builder.Entity<Category>()
+                .HasIndex(category => category.Name)
+                .IsUnique();
+
+            builder.Entity<Category>()
+                .Property(category => category.Name)
+                .HasMaxLength(100)
+                .IsRequired();
+
+            builder.Entity<Product>()
+                .HasOne(product => product.Category)
+                .WithMany(category => category.Products)
+                .HasForeignKey(product => product.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
+
     }
 }
