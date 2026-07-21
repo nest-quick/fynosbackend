@@ -15,5 +15,8 @@ namespace FynosAPI.Dtos.Products
         [Range(0, double.MaxValue)]
         public decimal? MaxPrice { get; set; }
         public bool? InStock { get; set; }
+
+        [StringLength(100)]
+        public string? Search { get; set; }
     }
 }

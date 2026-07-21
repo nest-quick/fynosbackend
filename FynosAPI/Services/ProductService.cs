@@ -29,17 +29,38 @@ namespace FynosAPI.Services
             }
 
             _logger.LogInformation(
-                    "Retrieving products with Gender: {Gender}, CategoryId: {CategoryId}, MinPrice: {MinPrice}, MaxPrice: {MaxPrice}, InStock: {InStock}",
+                    "Retrieving products with Search: {Search}, Gender: {Gender}, CategoryId: {CategoryId}, MinPrice: {MinPrice}, MaxPrice: {MaxPrice}, InStock: {InStock}",
                     queryParameters.Gender,
                     queryParameters.CategoryId,
                     queryParameters.MinPrice,
                     queryParameters.MaxPrice,
-                    queryParameters.InStock);
+                    queryParameters.InStock,
+                    queryParameters.Search);
 
             var query = _context.Products
                 .AsNoTracking()
                 .Include(product => product.Category)
                 .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(queryParameters.Search))
+            {
+                var searchTerm = queryParameters.Search.Trim();
+
+                query = query.Where(product =>
+                    EF.Functions.ILike(
+                        product.Name,
+                        $"%{searchTerm}%") ||
+                    (
+                        product.Description != null &&
+                        EF.Functions.ILike(
+                            product.Description,
+                            $"%{searchTerm}%")
+                    ) ||
+                    EF.Functions.ILike(
+                        product.Category.Name,
+                        $"%{searchTerm}%")
+                );
+            }
 
             if (!string.IsNullOrEmpty(queryParameters.Gender))
             {
